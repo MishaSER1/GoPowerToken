@@ -41,31 +41,6 @@ contract GoPowerToken is StandardToken, Ownable {
 
 
   //
-  //   Testing stuff
-  //
-
-  bool public testingInProgress = true;
-  modifier onlyDuringTesting { require(testingInProgress); _; }
-
-  uint fakeNow = now;
-  function setFakeNow(uint _now) onlyOwner onlyDuringTesting external returns(bool) {
-    fakeNow = _now;
-    return true;
-  }
-
-  function getNow() private view returns (uint) {
-    if (testingInProgress) { return fakeNow; }
-    else { return now; }
-  }
-
-  function finishTesting() onlyOwner onlyDuringTesting external returns(bool) {
-    testingInProgress = false;
-    fakeNow = 0;
-    return true;
-  }
-
-
-  //
   //    State transitions
   //
 
@@ -158,7 +133,7 @@ contract GoPowerToken is StandardToken, Ownable {
 
     if (icoInProgress()) { // main ICO
 
-      var daysFromIcoStart = getNow().sub(icoStartedAt).div(1 days);
+      var daysFromIcoStart = now.sub(icoStartedAt).div(1 days);
       tokenRate = tokenRate.add( TOKEN_RATE_ICO_DAILY_INCREMENT.mul(daysFromIcoStart) );
       amount = msg.value.div(tokenRate);
 

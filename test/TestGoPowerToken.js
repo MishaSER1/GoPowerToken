@@ -1,40 +1,43 @@
+const timeTravel = function (time) {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_increaseTime",
+      params: [time], // 86400 is num seconds in day
+      id: new Date().getTime()
+    }, (err, result) => {
+      if(err){ return reject(err) }
+      return resolve(result)
+    });
+  })
+}
+
+const mineBlock = function () {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_mine",
+      id: 12345
+    }, function(err, result) {
+      if(err){ return reject(err) }
+      return resolve(result)
+    });
+  })
+}
+
+
 // Specifically request an abstraction for GoPowerToken
 var GoPowerToken = artifacts.require("GoPowerToken");
 
 contract('GoPowerToken', function(accounts) {
-  it("can set tradeRobot", function() {
-    return GoPowerToken.deployed().then(function(instance) {
-      token = instance;
-      return token.setTradeRobot.call(accounts[1]);
-    }).then(function(retval) {
-      assert.equal(retval, true);
-    }).then(function() {
-      return token.tradeRobot.call();
-    }).then(function(retval) {
-      assert.equal(retval, accounts[1]);
-    });;
+
+  it("can set tradeRobot", async function() {
+    token = await GoPowerToken.deployed();
+    await token.setTradeRobot(accounts[1]);
+    await timeTravel(86400 * 3) // 3 days later
+    await mineBlock()           // workaround for https://github.com/ethereumjs/testrpc/issues/336
+    robot = await token.tradeRobot.call();
+    assert.equal(robot, accounts[1]);
   });
-/*
-  it("has proper tradeRobot", function() {
-    return GoPowerToken.deployed().then(function(instance) {
-      return instance.tradeRobot.call();
-    }).then(function(retval) {
-      assert.equal(retval, accounts[0], "");
-    });
-  });
-  it("can start Presale", function() {
-    return GoPowerToken.deployed().then(function(instance) {
-      return instance.startPresale.call();
-    }).then(function(retval) {
-      assert.equal(retval, true, "");
-    });
-  });
-  it("can mint 5000 GPT to the first account", function() {
-    return GoPowerToken.deployed().then(function(instance) {
-      return instance.mint.call(accounts[0], 5000);
-    }).then(function(retval) {
-      assert.equal(retval, true, "true is expected from mint()");
-    });
-  });
-*/
+
 });

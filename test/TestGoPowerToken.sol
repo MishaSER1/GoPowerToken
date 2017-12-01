@@ -9,7 +9,6 @@ contract TestGoPowerToken {
 
   // Testing the initial properties of GoPowerToken
   function testGoPowerTokenInitialProperties() public {
-    Assert.equal(gptoken.testingInProgress(), true, "Expected gptoken.testingInProgress == true");
     Assert.equal(gptoken.presaleStartedAt(), 0, "Expected gptoken.presaleStartedAt == 0");
   }
 
