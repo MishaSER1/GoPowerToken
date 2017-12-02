@@ -30,7 +30,7 @@ contract GoPowerToken is StandardToken, Ownable {
   //   Token rate calculation parameters
   //
 
-  uint constant TOKEN_RATE_INITIAL =  0.00057143 ether;
+  uint constant TOKEN_RATE_INITIAL =  0.000571428571428571 ether;           // 1/1750
   uint constant TOKEN_RATE_ICO_DAILY_INCREMENT = TOKEN_RATE_INITIAL / 200;  // 0.5%
   uint constant BONUS_PRESALE = 50;    // 50%
   uint constant BONUS_ICO_WEEK1 = 30;  // 30%
@@ -38,6 +38,7 @@ contract GoPowerToken is StandardToken, Ownable {
   uint constant BONUS_ICO_WEEK3 = 10;  // 10%
   uint constant BONUS_ICO_WEEK4 = 5;   // 5%
   uint constant MINIMUM_PAYABLE_AMOUNT = 0.0001 ether;
+  uint constant TOKEN_BUY_PRECISION = 0.01 ether;
 
 
   //
@@ -85,7 +86,7 @@ contract GoPowerToken is StandardToken, Ownable {
     _mint_internal(teamAddress, RESERVED_FOR_TEAM);
     _mint_internal(bountyAddress, RESERVED_FOR_BOUNTY);
     icoFinishedAt = now;
-    tradeRobot = 0x0;
+    tradeRobot = 0x0;   // disable trade robot
     return true;
   }
 
@@ -98,7 +99,7 @@ contract GoPowerToken is StandardToken, Ownable {
   modifier onlyTradeRobot { require(msg.sender == tradeRobot); _; }
 
   function setTradeRobot(address _robot) onlyOwner external returns(bool) {
-    require(icoFinishedAt == 0); // only if ICO is not finished (in progress or not started yet)
+    require(icoFinishedAt == 0); // the robot is disabled after the end of ICO
     tradeRobot = _robot;
     return true;
   }
@@ -114,16 +115,16 @@ contract GoPowerToken is StandardToken, Ownable {
     Transfer(address(0), _to, _amount);
   }
 
-  function mint(address _to, uint _amount) onlyDuringSale onlyTradeRobot public returns (bool) {
-    require(totalSupply.add(_amount) <= TOKEN_SALE_LIMIT);
+  function mint(address _to, uint _amount) onlyDuringSale onlyTradeRobot external returns (bool) {
     _mint_internal(_to, _amount);
     return true;
   }
 
-  function mintUpto(address _to, uint _newValue) external returns (bool) {
+  function mintUpto(address _to, uint _newValue) onlyDuringSale onlyTradeRobot external returns (bool) {
     var oldValue = balances[_to];
     require(_newValue > oldValue);
-    return mint(_to, _newValue.sub(oldValue));
+    _mint_internal(_to, _newValue.sub(oldValue));
+    return true;
   }
 
   function buy() onlyDuringSale public payable {
@@ -135,7 +136,7 @@ contract GoPowerToken is StandardToken, Ownable {
 
       var daysFromIcoStart = now.sub(icoStartedAt).div(1 days);
       tokenRate = tokenRate.add( TOKEN_RATE_ICO_DAILY_INCREMENT.mul(daysFromIcoStart) );
-      amount = msg.value.div(tokenRate);
+      amount = msg.value.mul(1e18).div(tokenRate);
 
       var weekNumber = 1 + daysFromIcoStart.div(7);
       if (weekNumber == 1) {
@@ -150,11 +151,14 @@ contract GoPowerToken is StandardToken, Ownable {
     
     } else {  // presale
 
-      amount = msg.value.div(tokenRate);
+      amount = msg.value.mul(1e18).div(tokenRate);
       amount = amount.add( amount.mul(BONUS_PRESALE).div(100) );
     }
 
-    mint(msg.sender, amount);
+    amount = amount.add(TOKEN_BUY_PRECISION/2).div(TOKEN_BUY_PRECISION).mul(TOKEN_BUY_PRECISION);
+
+    require(totalSupply.add(amount) <= TOKEN_SALE_LIMIT);
+    _mint_internal(msg.sender, amount);
   }
 
   function () external payable {
