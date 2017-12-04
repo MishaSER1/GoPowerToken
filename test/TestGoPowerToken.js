@@ -42,9 +42,9 @@ var GoPowerToken = artifacts.require("GoPowerToken");
 
 contract('GoPowerToken', function(accounts) {
 
-  let bountyAddress = 0x0;
-  let teamAddress = 0x0;
-  let settlementsAddress = 0x0;
+  let bountyAddress = '0xdFa360FdF23DC9A7bdF1d968f453831d3351c33D';
+  let teamAddress = '0xaA2E8DEbEAf429A21c59c3E697d9FC5bB86E126d';
+  let settlementsAddress = '0x9e6290C55faba3FFA269cCbF054f8D93586aaa6D';
 
   //===== before Presale =====
 
@@ -139,6 +139,13 @@ contract('GoPowerToken', function(accounts) {
     assert.equal(balance.toNumber(), 2625e18);
   });
 
+  it("can buy a small amount", async function() {
+    let token = await GoPowerToken.deployed();
+    await token.buy({value: 0.0003*1e18, from: accounts[8]});
+    let balance = await token.balanceOf(accounts[8]);
+    assert.equal(balance.toNumber(), 0.79e18);
+  });
+
   it("buy() does proper rounding", async function() {
     let token = await GoPowerToken.deployed();
     await token.buy({value: 1.0000057e+18});
@@ -162,6 +169,16 @@ contract('GoPowerToken', function(accounts) {
     let token = await GoPowerToken.deployed();
     try {
       await token.startICO();
+    } catch(e) {
+      return true;
+    }
+    throw new Error("I should never see this!");
+  });
+
+  it("cannot transfer tokens Presale", async function() {
+    let token = await GoPowerToken.deployed();
+    try {
+      await token.transfer(accounts[4], 1e18, {from: accounts[0]});
     } catch(e) {
       return true;
     }
@@ -314,12 +331,39 @@ contract('GoPowerToken', function(accounts) {
     throw new Error("I should never see this!");
   });
 
+  it("cannot transfer tokens during ICO", async function() {
+    let token = await GoPowerToken.deployed();
+    try {
+      await token.transfer(accounts[4], 1000e18, {from: accounts[9]});
+    } catch(e) {
+      return true;
+    }
+    throw new Error("I should never see this!");
+  });
+
 
   //===== Finish ICO =====
 
   it("can finish ICO", async function() {
     let token = await GoPowerToken.deployed();
     await token.finishICO();
+  });
+
+  it("can transfer tokens after ICO", async function() {
+    let token = await GoPowerToken.deployed();
+    await token.transfer(accounts[4], 1000e18, {from: accounts[9]});
+    let balance = await token.balanceOf(accounts[4]);
+    assert.equal(balance.toNumber(), 5550e18);
+  });
+
+  it("cannot transfer tokens more than owned", async function() {
+    let token = await GoPowerToken.deployed();
+    try {
+      await token.transfer(accounts[9], 6000e18, {from: accounts[4]});
+    } catch(e) {
+      return true;
+    }
+    throw new Error("I should never see this!");
   });
 
   it("cannot set tradeRobot after ICO", async function() {
@@ -375,7 +419,7 @@ contract('GoPowerToken', function(accounts) {
   it("has proper totalSupply after ICO", async function() {
     let token = await GoPowerToken.deployed();
     let totalSupply = await token.totalSupply();
-    assert.equal(totalSupply.toNumber(), 699975407.89e18);
+    assert.equal(totalSupply.toNumber(), 699975408.68e18);
   });
 
   it("cannot restart presale", async function() {
@@ -404,10 +448,10 @@ contract('GoPowerToken', function(accounts) {
     await token.collect();
     let newBalance = await getBalance(accounts[0]);
     let amount = newBalance.toNumber() - oldBalance.toNumber();
-    assert.equal(amount, 41.9970008*1e18);
+    assert.equal(Math.round(amount/1e16)*1e16, 42e18);
   });
 
-
+/*
   it("can ", async function() {
     let token = await GoPowerToken.deployed();
   });
@@ -421,6 +465,6 @@ contract('GoPowerToken', function(accounts) {
     }
     throw new Error("I should never see this!");
   });
-
+*/
 
 });

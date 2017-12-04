@@ -20,10 +20,9 @@ contract GoPowerToken is StandardToken, Ownable {
   uint constant RESERVED_FOR_TEAM =         30 * 1e6 * 1e18;
   uint constant RESERVED_FOR_BOUNTY =       20 * 1e6 * 1e18;
 
-  // TODO
-  address constant settlementsAddress = 0x0;
-  address constant teamAddress = 0x0;
-  address constant bountyAddress = 0x0;
+  address constant settlementsAddress = 0x9e6290C55faba3FFA269cCbF054f8D93586aaa6D;
+  address constant teamAddress = 0xaA2E8DEbEAf429A21c59c3E697d9FC5bB86E126d;
+  address constant bountyAddress = 0xdFa360FdF23DC9A7bdF1d968f453831d3351c33D;
 
 
   //
