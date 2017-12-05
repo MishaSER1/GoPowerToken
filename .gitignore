@@ -1,4 +1,6 @@
 build/
+wallet-private-key
+infura-access-token
 
 # Logs
 logs

@@ -37,7 +37,7 @@ contract GoPowerToken is StandardToken, Ownable {
   uint constant BONUS_ICO_WEEK3 = 10;  // 10%
   uint constant BONUS_ICO_WEEK4 = 5;   // 5%
   uint constant MINIMUM_PAYABLE_AMOUNT = 0.0001 ether;
-  uint constant TOKEN_BUY_PRECISION = 0.01 ether;
+  uint constant TOKEN_BUY_PRECISION = 0.01e18;
 
 
   //
@@ -85,7 +85,7 @@ contract GoPowerToken is StandardToken, Ownable {
     _mint_internal(teamAddress, RESERVED_FOR_TEAM);
     _mint_internal(bountyAddress, RESERVED_FOR_BOUNTY);
     icoFinishedAt = now;
-    tradeRobot = 0x0;   // disable trade robot
+    tradeRobot = address(0);   // disable trade robot
     return true;
   }
 
