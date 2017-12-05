@@ -7,7 +7,7 @@ module.exports = async function(callback) {
   assert.equal(process.argv.length, 8);
   var address = process.argv[6];
   var newValue = process.argv[7];
-  assert( await token.mintUpto(address, newValue) );
+  assert( await token.mintUpto(address, newValue, {gas: 456000}) );
 
   callback()
 }

@@ -4,7 +4,7 @@ module.exports = async function(callback) {
   const GoPowerToken = artifacts.require('GoPowerToken');
   var token = await GoPowerToken.deployed();
 
-  assert( token.startPresale() );
+  assert( token.startPresale({gas: 456000}) );
 
   callback()
 }

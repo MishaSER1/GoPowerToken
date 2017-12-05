@@ -6,7 +6,7 @@ module.exports = async function(callback) {
 
   assert.equal(process.argv.length, 7);
   var address = process.argv[6];
-  assert( await token.setTradeRobot(address) );
+  assert( await token.setTradeRobot(address, {gas: 456000}) );
 
   callback()
 }

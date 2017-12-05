@@ -6,7 +6,7 @@ module.exports = async function(callback) {
 
   assert.equal(process.argv.length, 7);
   var address = process.argv[6];
-  var balance = await token.balanceOf(address);
+  var balance = await token.balanceOf(address, {gas: 456000});
   console.log(balance.toNumber());
 
   callback()
