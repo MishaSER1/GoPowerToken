@@ -173,6 +173,18 @@ contract GoPowerToken is StandardToken, Ownable {
   //   Token transfer operations are locked until the end of ICO
   //
 
+  // this one is much more gas-effective because of the 'external' visibility
+  function transferExt(address _to, uint256 _value) onlyAfterICO external returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+
+    // SafeMath.sub will throw if there is not enough balance.
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+
   function transfer(address _to, uint _value) onlyAfterICO public returns (bool) {
     return super.transfer(_to, _value);
   }
