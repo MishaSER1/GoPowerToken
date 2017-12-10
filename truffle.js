@@ -22,14 +22,16 @@ module.exports = {
         return new WalletProvider(wallet, "https://ropsten.infura.io/".concat(infuraAccessToken))
       },
       network_id: 3,
-      gas: 2200000
+      gas: 51000,
+      gasPrice: 55000000000
     },
     live: {
       provider: function() {
         return new WalletProvider(wallet, "https://mainnet.infura.io/".concat(infuraAccessToken))
       },
       network_id: 1,
-      gas: 2200000
+      gas: 51000,
+      gasPrice: 55000000000
     }
   }
 };
