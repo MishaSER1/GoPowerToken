@@ -41,10 +41,17 @@ module.exports = async function(callback) {
       assert( await token.mint(address, newValue, {gas: 112000}) );
       break;
     case "mintUpto":
-      assert.equal(process.argv.length, 9);
+      assert((process.argv.length == 9) || (process.argv.length == 10));
       var address = process.argv[7];
       var newValue = process.argv[8];
-      assert( await token.mintUpto(address, newValue, {gas: 112000}) );
+      var gasPrice = 55e9;
+      if (process.argv.length == 10) {
+        gasPrice = process.argv[9];
+      }
+      assert(gasPrice>1e9 && gasPrice<200e9);
+      assert(newValue == Math.round(newValue/1e16)*1e16);
+      assert(newValue > 0.01e18);
+      assert( await token.mintUpto(address, newValue, {gas: 112000, gasPrice: gasPrice}) );
       break;
     case "collect":
       assert.equal(process.argv.length, 7);
